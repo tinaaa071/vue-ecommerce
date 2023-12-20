@@ -69,7 +69,7 @@ export default {
             document.cookie = `hexToken=${token}; expires=${new Date(expired)}`
             // console.log(res)
             // 轉址到 DashBoard
-            this.$router.push('/dashboard')
+            this.$router.push('/dashboard/products')
           }
         })
     }

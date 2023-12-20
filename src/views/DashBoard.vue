@@ -1,9 +1,18 @@
 <template>
-    Dashboard
+    <!-- 加入 Navbar 元件 -->
+    <Navbar></Navbar>
+    <router-view/>
 </template>
 
 <script>
+// 導入 NavBar
+import Navbar from '../components/NavBar.vue'
+
 export default {
+  // 區域註冊 Navbar 元件
+  components: {
+    Navbar
+  },
   created () {
     // 使用 replace 取出 token
     const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1')
@@ -23,7 +32,7 @@ export default {
         console.log(res)
         // 判斷登入失敗，回到首頁
         if (!res.data.success) {
-          this.$router.push('login')
+          this.$router.push('/login')
         }
       })
   }
