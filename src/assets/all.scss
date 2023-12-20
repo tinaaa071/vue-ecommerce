@@ -1,0 +1,7 @@
+// 匯入 Bootstrap 檔案
+@import "~bootstrap/scss/functions";
+// 替換為自己的 variables 檔案
+@import "./helpers/variables";
+@import "~bootstrap/scss/mixins";
+
+@import "~bootstrap/scss/bootstrap";
