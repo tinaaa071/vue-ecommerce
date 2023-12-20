@@ -59,7 +59,18 @@ export default {
       this.$http.post(api, this.user)
         // promise
         .then((res) => {
-          console.log(res)
+          // 判斷登入成功，就轉至 DashBoard
+          if (res.data.success) {
+            // 新增 cookie
+            // document.cookie = `自定義名稱=${token}; 到期日`
+            const { token, expired } = res.data
+            // console.log(token, expired)
+            // 需將到期日轉載成 token 可儲存之編碼
+            document.cookie = `hexToken=${token}; expires=${new Date(expired)}`
+            // console.log(res)
+            // 轉址到 DashBoard
+            this.$router.push('/dashboard')
+          }
         })
     }
   }

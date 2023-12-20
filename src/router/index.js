@@ -20,6 +20,12 @@ const routes = [
     path: '/login',
     name: 'login',
     component: () => import('../views/LoginHome.vue')
+  },
+  // 新增 DashBoard 路由
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: () => import('../views/DashBoard.vue')
   }
 ]
 
