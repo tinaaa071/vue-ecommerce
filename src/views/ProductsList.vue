@@ -2,7 +2,7 @@
     <!-- 新增按鈕 -->
     <div class="text-end">
         <!-- 使用 @click 指向元件 -->
-        <button class="btn btn-primary" type="button" @click="openModal">
+        <button class="btn btn-primary" type="button" @click="openModal(true)">
             增加一個產品
         </button>
     </div>
@@ -36,7 +36,8 @@
             </td>
             <td>
                 <div class="btn-group">
-                <button class="btn btn-outline-primary btn-sm">編輯</button>
+                <button class="btn btn-outline-primary btn-sm"
+                @click="openModal(false, item)">編輯</button>
                 <button class="btn btn-outline-danger btn-sm">刪除</button>
                 </div>
             </td>
@@ -60,7 +61,10 @@ export default {
     // 回傳產品資訊陣列
     return {
       products: [],
-      pagination: {}
+      pagination: {},
+      tempProduct: {},
+      // 增加屬性狀態
+      isNew: false
     }
   },
   // 區域註冊
@@ -82,9 +86,18 @@ export default {
         })
     },
     // 獨立 openModal 功能
-    openModal () {
-      // 清空 tempProduct
-      this.tempProduct = {}
+    // (使否為新, 若是編輯就把品項加入)
+    openModal (isNew, item) {
+      // 判斷是否為新
+      if (isNew) {
+        // 清空 tempProduct
+        this.tempProduct = {}
+      } else {
+        // 新的 item 時
+        this.tempProduct = { ...item }
+      }
+      // 暫存狀態
+      this.isNew = isNew
       const productComponent = this.$refs.productModal
       // 開啟內層 Modal
       productComponent.showModal()
@@ -93,10 +106,21 @@ export default {
     updateProduct (item) {
       // 儲存遠端傳送之資料
       this.tempProduct = item
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/product`
+
+      // 若為新增狀態
+      let api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/product`
+      let httpMethod = 'post'
+
+      // 若 this.isNew 不是新的（編輯狀態）就會執行
+      if (!this.isNew) {
+        // 調整 api
+        api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/product/${item.id}`
+        // 調整 httpMethod
+        httpMethod = 'put'
+      }
       const productComponent = this.$refs.productModal
       // 將資料發送至遠端
-      this.$http.post(api, { data: this.tempProduct }).then((response) => {
+      this.$http[httpMethod](api, { data: this.tempProduct }).then((response) => {
         // console.log(response)
         // 設定新增完產品後關閉 Modal
         productComponent.hideModal()
