@@ -1,7 +1,9 @@
 <template>
     <!-- 加入 Navbar 元件 -->
     <Navbar></Navbar>
+    <div class="container-fluid">
     <router-view/>
+    </div>
 </template>
 
 <script>
