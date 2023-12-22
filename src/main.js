@@ -13,6 +13,9 @@ import 'vue3-loading-overlay/dist/vue3-loading-overlay.css'
 import App from './App.vue'
 import router from './router'
 
+// 匯出 filters.js 內之檔案
+import { currency } from './methods/filters'
+
 import 'bootstrap/dist/js/bootstrap.bundle'
 
 // 全域註冊
@@ -21,3 +24,8 @@ app.use(VueAxios, axios)
 app.use(router)
 app.component('LoadingEffect', Loading)
 app.mount('#app')
+// 使用 config 註冊
+// app.config.globalProperties.自定義屬性名稱
+app.config.globalProperties.$filters = {
+  currency
+}

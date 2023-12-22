@@ -28,10 +28,11 @@
             <td>{{ item.category }}</td>
             <td>{{ item.title }}</td>
             <td class="text-right">
-                {{ item.origin_price }}
+                <!-- currency 為函式，所以需使用 currency() -->
+                {{ $filters.currency(item.origin_price) }}
             </td>
             <td class="text-right">
-                {{ item.price }}
+                {{ $filters.currency(item.price) }}
             </td>
             <td>
                 <!-- 使用 v-if 判斷啟用狀態 -->
@@ -50,6 +51,7 @@
             </tr>
         </tbody>
     </table>
+    <!-- 載入 PaginationBtn 元件 -->
     <PaginationBtn :pages="pagination" @emit-pages="getProducts"></PaginationBtn>
     <!-- 將 Modal 元件加到畫面上 -->
     <!-- 增加 ref 呼叫 -->
@@ -69,6 +71,8 @@
 import ProductModal from '../components/ProductModal.vue'
 import DelProductModal from '@/components/DelModal.vue'
 import PaginationBtn from '@/components/PaginationBtn.vue'
+// 具名匯出 currency 方法
+// import { currency } from '@/methods/filters'
 
 export default {
   data () {
@@ -92,8 +96,11 @@ export default {
   // 加入 emitt
   inject: ['emitter'],
   methods: {
-    getProducts () {
-      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/products`
+    // 加入 currency
+    // currency,
+    // 預設在第一頁
+    getProducts (page = 1) {
+      const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/products/?page=${page}`
       // 讀取 loading 效果
       this.isLoading = true
       // get api 路徑
