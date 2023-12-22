@@ -1,4 +1,8 @@
 <template>
+    <!-- Loading 效果 -->
+    <!-- :active 為 props
+      :active="自定義狀態" -->
+    <LoadingEffect :active="isLoading"></LoadingEffect>
     <!-- 新增按鈕 -->
     <div class="text-end">
         <!-- 使用 @click 指向元件 -->
@@ -38,23 +42,33 @@
                 <div class="btn-group">
                 <button class="btn btn-outline-primary btn-sm"
                 @click="openModal(false, item)">編輯</button>
-                <button class="btn btn-outline-danger btn-sm">刪除</button>
+                <button class="btn btn-outline-danger btn-sm" @click="openDelProductModal(item)">
+                刪除
+              </button>
                 </div>
             </td>
             </tr>
         </tbody>
     </table>
+    <PaginationBtn :pages="pagination" @emit-pages="getProducts"></PaginationBtn>
     <!-- 將 Modal 元件加到畫面上 -->
     <!-- 增加 ref 呼叫 -->
     <!-- 設定觸發 updateProduct 方法 -->
     <ProductModal ref="productModal"
     :product="tempProduct"
     @update-product="updateProduct"></ProductModal>
+    <DelProductModal
+      :item="tempProduct"
+      ref="delProductModal"
+      @del-item="delProduct"
+    ></DelProductModal>
 </template>
 
 <script>
 // 匯入 Modal 元件
 import ProductModal from '../components/ProductModal.vue'
+import DelProductModal from '@/components/DelModal.vue'
+import PaginationBtn from '@/components/PaginationBtn.vue'
 
 export default {
   data () {
@@ -64,20 +78,30 @@ export default {
       pagination: {},
       tempProduct: {},
       // 增加屬性狀態
-      isNew: false
+      isNew: false,
+      // 預設為 false
+      isLoading: false
     }
   },
   // 區域註冊
   components: {
-    ProductModal
+    ProductModal,
+    DelProductModal,
+    PaginationBtn
   },
+  // 加入 emitt
+  inject: ['emitter'],
   methods: {
     getProducts () {
       const api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/products`
+      // 讀取 loading 效果
+      this.isLoading = true
       // get api 路徑
       this.$http.get(api)
         // promise
         .then((res) => {
+          // 取得遠端資料後關閉 loading 效果
+          this.isLoading = false
           if (res.data.success) {
             console.log(res.data)
             this.products = res.data.products
@@ -111,7 +135,7 @@ export default {
       let api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/product`
       let httpMethod = 'post'
 
-      // 若 this.isNew 不是新的（編輯狀態）就會執行
+      // 若 this.isNew 不是新的（編輯狀態）就會執行調整
       if (!this.isNew) {
         // 調整 api
         api = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/product/${item.id}`
@@ -125,6 +149,40 @@ export default {
         // 設定新增完產品後關閉 Modal
         productComponent.hideModal()
         // 重新取得列表資料
+        // this.getProducts()
+
+        if (response.data.success) {
+          this.getProducts()
+          // 若成功，觸發 emitter
+          this.emitter.emit('push-message', {
+            style: 'success',
+            title: '更新成功'
+          })
+        } else {
+          this.emitter.emit('push-message', {
+            style: 'danger',
+            title: '更新失敗',
+            // 由後端傳送失敗訊息內容，透過 join 將陣列一一取出，並補到 content 內
+            content: response.data.message.join('、')
+          })
+        }
+      })
+    },
+    // 加入 openDelModal 功能
+    openDelProductModal (item) {
+      this.tempProduct = { ...item }
+      console.log(item.id)
+      const delComponent = this.$refs.delProductModal
+      delComponent.showModal()
+    },
+    // 刪除商品功能
+    delProduct () {
+      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/product/${this.tempProduct.id}`
+      this.$http.delete(url).then((response) => {
+        console.log(this.tempProduct)
+        console.log(response.data)
+        const delComponent = this.$refs.delProductModal
+        delComponent.hideModal()
         this.getProducts()
       })
     }

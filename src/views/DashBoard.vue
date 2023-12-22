@@ -1,19 +1,32 @@
 <template>
     <!-- 加入 Navbar 元件 -->
     <Navbar></Navbar>
-    <div class="container-fluid">
+    <div class="container-fluid mt-3 position-relative">
+    <!-- 加入 ToastMessage -->
+    <ToastMessages></ToastMessages>
     <router-view/>
-    </div>
+  </div>
 </template>
 
 <script>
-// 導入 NavBar
+// 匯入 mitt
+import emitter from '@/methods/emitter'
+// 匯入 NavBar
 import Navbar from '../components/NavBar.vue'
+// 匯入 ToastMessage
+import ToastMessages from '@/components/ToastMessages.vue'
 
 export default {
-  // 區域註冊 Navbar 元件
+  // 區域註冊元件
   components: {
-    Navbar
+    Navbar,
+    ToastMessages
+  },
+  // 使內層元件都可使用外層功能
+  provide () {
+    return {
+      emitter
+    }
   },
   created () {
     // 使用 replace 取出 token

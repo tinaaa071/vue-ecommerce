@@ -25,7 +25,9 @@
                         <label for="customFile" class="form-label">或 上傳圖片
                         <i class="fas fa-spinner fa-spin"></i>
                         </label>
-                        <input type="file" id="customFile" class="form-control">
+                        <input type="file" id="customFile" class="form-control"
+                        ref="fileInput"
+                        @change="uploadFile">
                     </div>
                     <img class="img-fluid" alt="">
                     <!-- 延伸技巧，多圖 -->
@@ -155,6 +157,26 @@ export default {
     },
     hideModal () {
       this.modal.hide()
+    },
+    // 上傳圖片
+    uploadFile () {
+      // 取出 Input 內容
+      // 指向 files 內之第 0 個項目
+      const uploadedFile = this.$refs.fileInput.files[0]
+      // console.dir(uploadedFile)
+      // 建立 formData 內容
+      const formData = new FormData()
+      // 增加欄位至表單，並帶出 uploadedFile 取出的檔案
+      formData.append('file-to-upload', uploadedFile)
+      // 透過 API 發送至遠端
+      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/upload`
+      this.$http.post(url, formData).then((response) => {
+        console.log(response.data)
+        // 儲存於遠端路徑
+        if (response.data.success) {
+          this.tempProduct.imageUrl = response.data.imageUrl
+        }
+      })
     }
   },
   // 進行實體，需在元件載入後才能正確運作
