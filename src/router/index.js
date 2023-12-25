@@ -33,6 +33,32 @@ const routes = [
         path: 'products',
         name: 'products',
         component: () => import('../views/ProductsList.vue')
+      },
+      // 訂單列表
+      {
+        path: 'orders',
+        component: () => import('../views/OrderList.vue')
+      },
+      // 折價券列表
+      {
+        path: 'coupons',
+        component: () => import('../views/CouponList.vue')
+      },
+      // 路徑 /user 之下不需驗證
+      // 使用者頁面、購物車、商品頁
+      {
+        path: '/user',
+        component: () => import('../views/UserBoard.vue'),
+        children: [
+          {
+            path: 'cart',
+            component: () => import('../views/UserCart.vue')
+          },
+          {
+            path: 'product/:productId',
+            component: () => import('../views/UserProduct.vue')
+          }
+        ]
       }
     ]
   }
@@ -40,6 +66,7 @@ const routes = [
 
 const router = createRouter({
   history: createWebHashHistory(),
+  linkActiveClass: 'active',
   routes
 })
 

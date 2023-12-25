@@ -1,23 +1,18 @@
 <template>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Navbar</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand" href="#">範例作品</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Features</a>
-                </li>
-                <li class="nav-item">
-                <!-- .prevent 可取消預設事件 href="#" -->
-                <a class="nav-link" href="#" @click.prevent="logout">登出</a>
-                </li>
-            </ul>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+              <div class="navbar-nav">
+                <router-link to="/dashboard/products" class="nav-link">產品</router-link>
+                <router-link to="/dashboard/orders" class="nav-link">訂單</router-link>
+                <router-link to="/dashboard/coupons" class="nav-link">優惠券</router-link>
+                <a href="#" @click.prevent="logout" class="nav-link">登出</a>
+                <router-link to="/user/cart" class="nav-link">購物車</router-link>
+              </div>
             </div>
         </div>
     </nav>
