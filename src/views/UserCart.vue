@@ -13,7 +13,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="item in products" :key="item.id">
+            <tr v-for="item in sortProducts" :key="item.id">
               <td style="width: 200px">
                 <div style="height: 100px; background-size: cover; background-position: center"
                      :style="{backgroundImage: `url(${item.imageUrl})`}"></div>
@@ -30,13 +30,13 @@
                           @click="getProduct(item.id)">
                     查看更多
                   </button>
-                  <!-- 將  this.status.loadingItem 和當前 item.id 做比對，符合則按鈕顯示 disabled -->
+                  <!-- 將  this.cartLoadingItem 和當前 item.id 做比對，符合則按鈕顯示 disabled -->
                   <button type="button" class="btn btn-outline-danger"
-                  :disabled="this.status.loadingItem === item.id"
+                  :disabled="this.cartLoadingItem === item.id"
                   @click="addCart(item.id)"
                           >
                           <!-- spinner 效果 -->
-                          <div v-if="this.status.loadingItem === item.id" class="spinner-grow spinner-grow-sm text-danger" role="status">
+                          <div v-if="this.cartLoadingItem === item.id" class="spinner-grow spinner-grow-sm text-danger" role="status">
                             <span class="visually-hidden">
                                 Loading...
                             </span>
@@ -68,7 +68,7 @@
                 <tr v-for="item in cart.carts" :key="item.id">
                     <td>
                     <button type="button" class="btn btn-outline-danger btn-sm"
-                            :disabled="status.loadingItem === item.id"
+                            :disabled="cartLoadingItem === item.id"
                             @click="removeCartItem(item.id)">
                         <i class="bi bi-x"></i>
                     </button>
@@ -84,7 +84,7 @@
                     <div class="input-group input-group-sm">
                         <input type="number" class="form-control"
                         min="1"
-                        :disabled="item.id === status.loadingItem"
+                        :disabled="item.id === cartLoadingItem"
                         @change="updateCart(item)"
                         v-model.number="item.qty">
                         <div class="input-group-text">/ {{ item.product.unit }}</div>
@@ -174,15 +174,22 @@
 </template>
 
 <script>
+// 匯入 store
+import productStore from '@/stores/productStore'
+import statusStore from '@/stores/statusStore'
+import cartStore from '@/stores/cartStore'
+// 匯入方法及狀態
+import { mapState, mapActions } from 'pinia'
+
 export default {
   data () {
     return {
-      products: [],
+      // products: [],
       product: {},
-      status: {
-        // 對應品項 id，若為特定品項轉為 disabled 並加上讀取效果
-        loadingItem: ''
-      },
+      // status: {
+      //   // 對應品項 id，若為特定品項轉為 disabled 並加上讀取效果
+      //   loadingItem: ''
+      // },
       form: {
         user: {
           name: '',
@@ -191,83 +198,92 @@ export default {
           address: ''
         },
         message: ''
-      },
-      cart: {},
-      coupon_code: ''
+      }
+      // cart: {},
+      // // isLoading: false,
+      // coupon_code: ''
     }
+  },
+  // 匯入 store
+  computed: {
+    ...mapState(productStore, ['sortProducts']),
+    ...mapState(statusStore, ['isLoading', 'cartLoadingItem']),
+    ...mapState(cartStore, ['cart'])
   },
   methods: {
     // 取得產品列表
-    getProducts () {
-      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/products/all`
-      this.isLoading = true
-      this.$http.get(url).then((response) => {
-        this.products = response.data.products
-        console.log('products:', response)
-        this.isLoading = false
-      })
-    },
+    ...mapActions(productStore, ['getProducts']),
+    ...mapActions(cartStore, ['addCart', 'getCart', 'updateCart', 'removeCartItem']),
+    // getProducts () {
+    //   const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/products/all`
+    //   this.isLoading = true
+    //   this.$http.get(url).then((response) => {
+    //     this.products = response.data.products
+    //     console.log('products:', response)
+    //     this.isLoading = false
+    //   })
+    // },
     // 取得單一產品
-    getProduct (id) {
-      this.$router.push(`/user/product/${id}`)
-    },
-    // 加入購物車
-    addCart (id) {
-      // API
-      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart`
-      // 點擊時加入讀取效果
-      this.status.loadingItem = id
-      const cart = {
-        product_id: id,
-        qty: 1
-      }
-      // 發送 API
-      this.$http.post(url, { data: cart })
-        .then((res) => {
-          // 讀取成功後清空讀取效果
-          this.status.loadingItem = ''
-          console.log(res)
-          this.getCart()
-        })
-    },
-    // 加入購物車
-    getCart () {
-      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart`
-      this.isLoading = true
-      this.$http.get(url).then((response) => {
-        console.log(response)
-        this.cart = response.data.data
-        this.isLoading = false
-      })
-    },
-    // 更新購物車
-    updateCart (item) {
-      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart/${item.id}`
-      this.isLoading = true
-      // 讀取效果
-      this.status.loadingItem = item.id
-      const cart = {
-        product_id: item.product_id,
-        qty: item.qty
-      }
-      this.$http.put(url, { data: cart }).then((res) => {
-        console.log(res)
-        this.status.loadingItem = ''
-        this.getCart()
-      })
-    },
-    // 移除購物車品項
-    removeCartItem (id) {
-      this.status.loadingItem = id
-      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart/${id}`
-      this.isLoading = true
-      this.$http.delete(url).then((response) => {
-        this.$httpMessageState(response, '移除購物車品項')
-        this.status.loadingItem = ''
-        this.getCart()
-        this.isLoading = false
-      })
-    },
+    // getProduct (id) {
+    //   this.$router.push(`/user/product/${id}`)
+    // },
+    // // 加入購物車
+    // addCart (id) {
+    //   // API
+    //   const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart`
+    //   // 點擊時加入讀取效果
+    //   this.cartLoadingItem = id
+    //   const cart = {
+    //     product_id: id,
+    //     qty: 1
+    //   }
+    //   // 發送 API
+    //   this.$http.post(url, { data: cart })
+    //     .then((res) => {
+    //       // 讀取成功後清空讀取效果
+    //       this.cartLoadingItem = ''
+    //       console.log(res)
+    //       this.getCart()
+    //     })
+    // },
+    // // 加入購物車
+    // getCart () {
+    //   const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart`
+    //   this.isLoading = true
+    //   this.$http.get(url).then((response) => {
+    //     console.log(response)
+    //     this.cart = response.data.data
+    //     this.isLoading = false
+    //   })
+    // },
+    // // 更新購物車
+    // updateCart (item) {
+    //   const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart/${item.id}`
+    //   this.isLoading = true
+    //   // 讀取效果
+    //   this.cartLoadingItem = item.id
+    //   const cart = {
+    //     product_id: item.product_id,
+    //     qty: item.qty
+    //   }
+    //   this.$http.put(url, { data: cart }).then((res) => {
+    //     console.log(res)
+    //     this.cartLoadingItem = ''
+    //     this.getCart()
+    //   })
+    // },
+    // // 移除購物車品項
+    // removeCartItem (id) {
+    //   this.cartLoadingItem = id
+    //   const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart/${id}`
+    //   this.isLoading = true
+    //   this.$http.delete(url).then((response) => {
+    //     this.$httpMessageState(response, '移除購物車品項')
+    //     this.cartLoadingItem = ''
+    //     this.getCart()
+    //     this.isLoading = false
+    //   })
+    // },
     // 加入優惠券
     addCouponCode () {
       const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/coupon`

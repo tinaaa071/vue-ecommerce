@@ -9,7 +9,8 @@ import VueAxios from 'vue-axios'
 import Loading from 'vue3-loading-overlay'
 // Import stylesheet
 import 'vue3-loading-overlay/dist/vue3-loading-overlay.css'
-
+// Pinia
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
@@ -33,6 +34,7 @@ import zhTW from '@vee-validate/i18n/dist/locale/zh_TW.json'
 
 // 全域註冊
 const app = createApp(App)
+const pinia = createPinia()
 app.use(VueAxios, axios)
 app.use(router)
 app.component('LoadingEffect', Loading)
@@ -40,6 +42,7 @@ app.component('VForm', Form)
 app.component('VField', Field)
 app.component('ErrorMessage', ErrorMessage)
 app.mount('#app')
+app.use(pinia)
 // 使用 config 註冊
 // app.config.globalProperties.自定義屬性名稱
 app.config.globalProperties.$filters = {
