@@ -24,6 +24,7 @@ export default defineStore('cartStore', {
       // 發送 API
       axios.post(url, { data: cart })
         .then((res) => {
+          status.PushMessage({ title: '加入購物車' })
           // 讀取成功後清空讀取效果
           status.cartLoadingItem = ''
           console.log(res)

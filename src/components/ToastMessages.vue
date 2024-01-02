@@ -8,26 +8,36 @@
   </template>
 
 <script>
+import { storeToRefs } from 'pinia'
 import ToastAlert from '@/components/ToastAlert.vue'
+import statusStore from '@/stores/statusStore'
 
 export default {
   components: {
     ToastAlert
   },
-  data () {
+  setup () {
+    const status = statusStore()
+    const { messages } = storeToRefs(status)
+
     return {
-      messages: []
+      messages
     }
-  },
-  inject: ['emitter'],
-  mounted () {
-    // 觸發 push-message 時，就會將訊息加入訊息列表
-    // (message) 為外部傳來之資訊
-    this.emitter.on('push-message', (message) => {
-      // 有新訊息時，就將相關資訊取出，推送至訊息列表 messages 內
-      const { style = 'success', title, content } = message
-      this.messages.push({ style, title, content })
-    })
   }
+  // data () {
+  //   return {
+  //     messages: []
+  //   }
+  // }
+  // inject: ['emitter'],
+  // mounted () {
+  //   // 觸發 push-message 時，就會將訊息加入訊息列表
+  //   // (message) 為外部傳來之資訊
+  //   this.emitter.on('push-message', (message) => {
+  //     // 有新訊息時，就將相關資訊取出，推送至訊息列表 messages 內
+  //     const { style = 'success', title, content } = message
+  //     this.messages.push({ style, title, content })
+  //   })
+  // }
 }
 </script>
